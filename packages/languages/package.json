@@ -1,0 +1,23 @@
+{
+	"name": "@automattic/languages",
+	"version": "1.0.0",
+	"description": "WordPress.com Language Data",
+	"main": "dist/cjs/index.js",
+	"module": "dist/esm/index.js",
+	"types": "types/index.d.ts",
+	"sideEffects": false,
+	"license": "GPL-2.0-or-later",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Automattic/wp-calypso.git",
+		"directory": "packages/languages"
+	},
+	"author": "Automattic Inc.",
+	"scripts": {
+		"clean": "npx rimraf dist",
+		"prepublish": "yarn run clean",
+		"prepare": "transpile && cp src/languages-meta.json dist/cjs/languages-meta.json && cp src/languages-meta.json dist/esm/languages-meta.json",
+		"download": "node bin/download.js",
+		"test": "yarn jest"
+	}
+}
