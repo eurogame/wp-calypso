@@ -16,8 +16,11 @@
 	"scripts": {
 		"clean": "npx rimraf dist",
 		"prepublish": "yarn run clean",
-		"prepare": "transpile && cp src/languages-meta.json dist/cjs/languages-meta.json && cp src/languages-meta.json dist/esm/languages-meta.json",
+		"prepare": "transpile && cp src/*.json dist/esm/ && cp src/*.json dist/cjs/",
 		"download": "node bin/download.js",
 		"test": "yarn jest"
+	},
+	"dependencies": {
+		"lodash": "^4.17.20"
 	}
 }
