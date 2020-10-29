@@ -16,12 +16,6 @@ https
 		response.pipe( fs.createWriteStream( FILE_PATH ) );
 	} )
 	.on( 'error', ( error ) => {
-		if ( process.env.CALYPSO_ENV === 'production' ) {
-			console.error( error );
-			process.exit( 1 );
-		}
-
-		console.error(
-			`Failed to download ${ LANGUAGES_META_URL }. Calypso will be built with pre-defined languages data from stored in 'packages/languages/languages-meta.json'.`
-		);
+		console.error( error );
+		process.exit( 1 );
 	} );
