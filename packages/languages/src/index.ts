@@ -25,5 +25,6 @@ type SubLanguage = BaseLanguage & { parentLangSlug: string };
 
 export type Language = BaseLanguage | SubLanguage;
 
-export const languages: Language[] = values( data );
+const languages: Language[] = values( data );
+
 export default languages;
