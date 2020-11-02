@@ -292,11 +292,11 @@ export default function WPCheckout( {
 
 	return (
 		<Checkout>
-			<CheckoutErrorBoundary
-				errorMessage={ translate( 'Sorry, there was an error loading this information.' ) }
-				onError={ onSummaryError }
-			>
-				<CheckoutSummaryArea className={ isSummaryVisible ? 'is-visible' : '' }>
+			<CheckoutSummaryArea className={ isSummaryVisible ? 'is-visible' : '' }>
+				<CheckoutErrorBoundary
+					errorMessage={ translate( 'Sorry, there was an error loading this information.' ) }
+					onError={ onSummaryError }
+				>
 					<CheckoutSummaryTitleLink onClick={ () => setIsSummaryVisible( ! isSummaryVisible ) }>
 						<CheckoutSummaryTitle>
 							<CheckoutSummaryTitleIcon icon="info-outline" size={ 20 } />
@@ -317,8 +317,8 @@ export default function WPCheckout( {
 							addItemToCart={ addItemToCart }
 						/>
 					</CheckoutSummaryBody>
-				</CheckoutSummaryArea>
-			</CheckoutErrorBoundary>
+				</CheckoutErrorBoundary>
+			</CheckoutSummaryArea>
 			<CheckoutStepArea
 				submitButtonHeader={ <SubmitButtonHeader /> }
 				disableSubmitButton={ isOrderReviewActive }
