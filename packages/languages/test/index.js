@@ -5,7 +5,7 @@
 /**
  * Internal dependencies
  */
-import { languages } from '../src';
+import languages from '../src';
 
 describe( 'languages', () => {
 	test( 'languages contains locale data', () => {

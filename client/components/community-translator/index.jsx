@@ -10,8 +10,8 @@ import { find, isEmpty } from 'lodash';
  * Internal dependencies
  */
 import Translatable from './translatable';
-import userSettings from 'calypso/lib/user-settings';
 import languages from '@automattic/languages';
+import userSettings from 'calypso/lib/user-settings';
 import { isCommunityTranslatorEnabled } from 'calypso/components/community-translator/utils';
 
 /**
