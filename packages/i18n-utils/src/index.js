@@ -1,24 +1,110 @@
 /**
  * External dependencies
  */
-import { find, isString, map, pickBy, includes } from 'lodash';
+import { isString } from 'lodash';
 import i18n, { getLocaleSlug } from 'i18n-calypso';
 
 /**
  * Internal dependencies
  */
-import config from 'calypso/config';
-import { getUrlParts, getUrlFromParts } from 'calypso/lib/url/url-parts';
-import languages from '@automattic/languages';
+import { getUrlParts, getUrlFromParts } from './url-parts';
+import { languagesBySlug, languageSlugs } from '@automattic/languages';
 
 /**
- * a locale can consist of three component
- * aa: language code
- * -bb: regional code
- * _cc: variant suffix
- * while the language code is mandatory, the other two are optional.
+ * Config replacements
  */
-const localeRegex = /^[A-Z]{2,3}(-[A-Z]{2,3})?(_[A-Z]{2,6})?$/i;
+export const i18nDefaultLocaleSlug = 'en';
+export const localesWithBlog = [ 'en', 'ja', 'es', 'pt', 'fr', 'pt-br' ];
+export const localesWithPrivacyPolicy = [ 'en', 'fr', 'de' ];
+export const localesWithCookiePolicy = [ 'en', 'fr', 'de' ];
+export const localesToSubdomains = {
+	'pt-br': 'br',
+	br: 'bre',
+	zh: 'zh-cn',
+	'zh-hk': 'zh-tw',
+	'zh-sg': 'zh-cn',
+	kr: 'ko',
+};
+export const livechatSupportLocales = [ 'en', 'es', 'pt-br' ];
+export const supportSiteLocales = [
+	'ar',
+	'de',
+	'en',
+	'es',
+	'fr',
+	'he',
+	'id',
+	'it',
+	'ja',
+	'ko',
+	'nl',
+	'pt-br',
+	'ru',
+	'sv',
+	'tr',
+	'zh-cn',
+	'zh-tw',
+];
+
+export const forumLocales = [
+	'ar',
+	'de',
+	'el',
+	'en',
+	'es',
+	'fa',
+	'fi',
+	'fr',
+	'id',
+	'it',
+	'ja',
+	'nl',
+	'pt',
+	'pt-br',
+	'ru',
+	'sv',
+	'th',
+	'tl',
+	'tr',
+];
+export const magnificentNonEnLocales = [
+	'es',
+	'pt-br',
+	'de',
+	'fr',
+	'he',
+	'ja',
+	'it',
+	'nl',
+	'ru',
+	'tr',
+	'id',
+	'zh-cn',
+	'zh-tw',
+	'ko',
+	'ar',
+	'sv',
+];
+export const jetpackComLocales = [
+	'en',
+	'ar',
+	'de',
+	'es',
+	'fr',
+	'he',
+	'id',
+	'it',
+	'ja',
+	'ko',
+	'nl',
+	'pt-br',
+	'ro',
+	'ru',
+	'sv',
+	'tr',
+	'zh-cn',
+	'zh-tw',
+];
 
 export function getPathParts( path ) {
 	// Remove trailing slash then split. If there is a trailing slash,
@@ -33,7 +119,7 @@ export function getPathParts( path ) {
  * @returns {boolean} true when the default locale is provided
  */
 export function isDefaultLocale( locale ) {
-	return locale === config( 'i18n_default_locale_slug' );
+	return locale === i18nDefaultLocaleSlug;
 }
 
 /**
@@ -89,15 +175,6 @@ export function translationExists() {
 }
 
 /**
- * Return a list of all supported language slugs
- *
- * @returns {Array} A list of all supported language slugs
- */
-export function getLanguageSlugs() {
-	return map( languages, 'langSlug' );
-}
-
-/**
  * Return a specifier for page.js/Express route param that enumerates all supported languages.
  *
  * @param {string} name of the parameter. By default it's `lang`, some routes use `locale`.
@@ -105,8 +182,17 @@ export function getLanguageSlugs() {
  * @returns {string} Router param specifier that looks like `:lang(cs|de|fr|pl)`
  */
 export function getLanguageRouteParam( name = 'lang', optional = true ) {
-	return `:${ name }(${ getLanguageSlugs().join( '|' ) })${ optional ? '?' : '' }`;
+	return `:${ name }(${ languageSlugs.join( '|' ) })${ optional ? '?' : '' }`;
 }
+
+/**
+ * a locale can consist of three component
+ * aa: language code
+ * -bb: regional code
+ * _cc: variant suffix
+ * while the language code is mandatory, the other two are optional.
+ */
+const localeRegex = /^[A-Z]{2,3}(-[A-Z]{2,3})?(_[A-Z]{2,6})?$/i;
 
 /**
  * Matches and returns language from config.languages based on the given localeSlug
@@ -118,10 +204,7 @@ export function getLanguage( langSlug ) {
 	if ( localeRegex.test( langSlug ) ) {
 		// Find for the langSlug first. If we can't find it, split it and find its parent slug.
 		// Please see the comment above `localeRegex` to see why we can split by - or _ and find the parent slug.
-		return (
-			find( languages, { langSlug } ) ||
-			find( languages, { langSlug: langSlug.split( /[-_]/ )[ 0 ] } )
-		);
+		return languagesBySlug[ langSlug ] || languagesBySlug[ langSlug.split( /[-_]/ )[ 0 ] ];
 	}
 
 	return undefined;
@@ -156,23 +239,7 @@ export function addLocaleToPath( path, locale ) {
 	return removeLocaleFromPath( urlParts.pathname ) + `/${ locale }` + queryString;
 }
 
-const localesWithBlog = [ 'en', 'ja', 'es', 'pt', 'fr', 'pt-br' ];
-const localesWithPrivacyPolicy = [ 'en', 'fr', 'de' ];
-const localesWithCookiePolicy = [ 'en', 'fr', 'de' ];
-const localesToSubdomains = {
-	'pt-br': 'br',
-	br: 'bre',
-	zh: 'zh-cn',
-	'zh-hk': 'zh-tw',
-	'zh-sg': 'zh-cn',
-	kr: 'ko',
-};
-
 const setLocalizedUrlHost = ( hostname, validLocales = [] ) => ( urlParts, localeSlug ) => {
-	if ( typeof validLocales === 'string' ) {
-		validLocales = config( validLocales );
-	}
-
 	if ( validLocales.includes( localeSlug ) && localeSlug !== 'en' ) {
 		// Avoid changing the hostname when the locale is set via the path.
 		if ( urlParts.pathname.substr( 0, localeSlug.length + 2 ) !== '/' + localeSlug + '/' ) {
@@ -196,10 +263,6 @@ const setLocalizedWpComPath = ( prefix, validLocales = [], limitPathMatch = null
 	}
 	urlParts.pathname = prefix + urlParts.pathname;
 
-	if ( typeof validLocales === 'string' ) {
-		validLocales = config( validLocales );
-	}
-
 	if ( validLocales.includes( localeSlug ) && localeSlug !== 'en' ) {
 		urlParts.pathname = ( localesToSubdomains[ localeSlug ] || localeSlug ) + urlParts.pathname;
 	}
@@ -210,10 +273,6 @@ const prefixLocalizedUrlPath = ( validLocales = [], limitPathMatch = null ) => (
 	urlParts,
 	localeSlug
 ) => {
-	if ( typeof validLocales === 'string' ) {
-		validLocales = config( validLocales );
-	}
-
 	if ( typeof limitPathMatch === 'object' && limitPathMatch instanceof RegExp ) {
 		if ( ! limitPathMatch.test( urlParts.pathname ) ) {
 			return urlParts; // No rewriting if not matches the path.
@@ -227,16 +286,16 @@ const prefixLocalizedUrlPath = ( validLocales = [], limitPathMatch = null ) => (
 };
 
 const urlLocalizationMapping = {
-	'wordpress.com/support/': prefixLocalizedUrlPath( 'support_site_locales' ),
+	'wordpress.com/support/': prefixLocalizedUrlPath( livechatSupportLocales ),
 	'wordpress.com/blog/': prefixLocalizedUrlPath( localesWithBlog, /^\/blog\/?$/ ),
-	'wordpress.com/tos/': setLocalizedUrlHost( 'wordpress.com', 'magnificent_non_en_locales' ),
-	'jetpack.com': setLocalizedUrlHost( 'jetpack.com', 'jetpack_com_locales' ),
-	'en.support.wordpress.com': setLocalizedWpComPath( '/support', 'support_site_locales' ),
+	'wordpress.com/tos/': setLocalizedUrlHost( 'wordpress.com', magnificentNonEnLocales ),
+	'jetpack.com': setLocalizedUrlHost( 'jetpack.com', jetpackComLocales ),
+	'en.support.wordpress.com': setLocalizedWpComPath( '/support', supportSiteLocales ),
 	'en.blog.wordpress.com': setLocalizedWpComPath( '/blog', localesWithBlog, /^\/$/ ),
-	'en.forums.wordpress.com': setLocalizedUrlHost( 'forums.wordpress.com', 'forum_locales' ),
+	'en.forums.wordpress.com': setLocalizedUrlHost( 'forums.wordpress.com', forumLocales ),
 	'automattic.com/privacy/': prefixLocalizedUrlPath( localesWithPrivacyPolicy ),
 	'automattic.com/cookies/': prefixLocalizedUrlPath( localesWithCookiePolicy ),
-	'wordpress.com': setLocalizedUrlHost( 'wordpress.com', 'magnificent_non_en_locales' ),
+	'wordpress.com': setLocalizedUrlHost( 'wordpress.com', magnificentNonEnLocales ),
 };
 
 export function localizeUrl( fullUrl, locale ) {
@@ -297,35 +356,10 @@ export function removeLocaleFromPath( path ) {
 	const locale = parts.pop();
 
 	if ( 'undefined' === typeof getLanguage( locale ) ) {
-		parts.push( locale );
+		parts.push( locale ); // locale not present, push whatever this was back onto the stack
 	}
 
 	return parts.join( '/' ) + queryString;
-}
-
-/**
- * Filter out unexpected values from the given language revisions object.
- *
- * @param {object} languageRevisions A candidate language revisions object for filtering.
- *
- * @returns {object} A valid language revisions object derived from the given one.
- */
-export function filterLanguageRevisions( languageRevisions ) {
-	const langSlugs = getLanguageSlugs();
-
-	// Since there is no strong guarantee that the passed-in revisions map will have the identical set of languages as we define in calypso,
-	// simply filtering against what we have here should be sufficient.
-	return pickBy( languageRevisions, ( revision, slug ) => {
-		if ( typeof revision !== 'number' ) {
-			return false;
-		}
-
-		if ( ! includes( langSlugs, slug ) ) {
-			return false;
-		}
-
-		return true;
-	} );
 }
 
 /**
@@ -335,7 +369,7 @@ export function filterLanguageRevisions( languageRevisions ) {
  * @returns {boolean} true when provided magnificent non-english locale.
  */
 export function isMagnificentLocale( locale ) {
-	return config( 'magnificent_non_en_locales' ).includes( locale );
+	return magnificentNonEnLocales.includes( locale );
 }
 
 /**

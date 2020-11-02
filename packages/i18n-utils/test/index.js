@@ -15,68 +15,9 @@ import {
 	localizeUrl,
 	canBeTranslated,
 	getPathParts,
-	filterLanguageRevisions,
 	translationExists,
 	isMagnificentLocale,
-} from 'calypso/lib/i18n-utils';
-
-jest.mock( 'config', () => ( key ) => {
-	if ( 'i18n_default_locale_slug' === key ) {
-		return 'en';
-	}
-
-	if ( 'support_site_locales' === key ) {
-		return [ 'en', 'es', 'de', 'ja', 'pt-br' ];
-	}
-
-	if ( 'forum_locales' === key ) {
-		return [ 'en', 'es', 'de', 'ja', 'pt-br', 'th' ];
-	}
-
-	if ( 'magnificent_non_en_locales' === key ) {
-		return [
-			'es',
-			'pt-br',
-			'de',
-			'fr',
-			'he',
-			'ja',
-			'it',
-			'nl',
-			'ru',
-			'tr',
-			'id',
-			'zh-cn',
-			'zh-tw',
-			'ko',
-			'ar',
-			'sv',
-		];
-	}
-
-	if ( 'jetpack_com_locales' === key ) {
-		return [
-			'en',
-			'ar',
-			'de',
-			'es',
-			'fr',
-			'he',
-			'id',
-			'it',
-			'ja',
-			'ko',
-			'nl',
-			'pt-br',
-			'ro',
-			'ru',
-			'sv',
-			'tr',
-			'zh-cn',
-			'zh-tw',
-		];
-	}
-} );
+} from '../src';
 
 // Mock only the getLocaleSlug function from i18n-calypso, and use
 // original references for all the other functions
@@ -580,34 +521,6 @@ describe( 'utils', () => {
 				'the',
 				'money',
 			] );
-		} );
-	} );
-	describe( 'filterLanguageRevisions()', () => {
-		const valid = {
-			en: 123,
-			ja: 456,
-		};
-
-		test( 'should leave a valid object as it is', () => {
-			expect( filterLanguageRevisions( valid ) ).toEqual( valid );
-		} );
-
-		test( 'should filter out unexpected keys.', () => {
-			const invalid = {
-				hahahaha: 999,
-				...valid,
-			};
-
-			expect( filterLanguageRevisions( invalid ) ).toEqual( valid );
-		} );
-
-		test( 'should filter out unexpected values.', () => {
-			const invalid = {
-				es: 'to crash or not to crash, that is the problem.',
-				...valid,
-			};
-
-			expect( filterLanguageRevisions( invalid ) ).toEqual( valid );
 		} );
 	} );
 
