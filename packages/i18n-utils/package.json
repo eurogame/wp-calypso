@@ -1,0 +1,31 @@
+{
+	"name": "@automattic/i18n-utils",
+	"version": "1.0.0",
+	"description": "WordPress.com i18n utils",
+	"main": "dist/cjs/index.js",
+	"module": "dist/esm/index.js",
+	"types": "dist/types/index.d.ts",
+	"sideEffects": false,
+	"license": "GPL-2.0-or-later",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Automattic/wp-calypso.git",
+		"directory": "packages/i18n-utils"
+	},
+	"author": "Automattic Inc.",
+	"scripts": {
+		"clean": "npx rimraf dist",
+		"prepublish": "yarn run clean",
+		"prepare.tsc": "tsc --project ./tsconfig.json && tsc --project ./tsconfig-cjs.json",
+		"prepare": "transpile",
+		"watch": "tsc --project ./tsconfig.json --watch",
+		"download": "node bin/download.js",
+		"test": "yarn jest"
+	},
+	"dependencies": {
+		"@automattic/languages": "^1.0.0",
+		"i18n-calypso": "^5.0.0",
+		"lodash": "^4.17.15",
+		"calypso": "^0.17.0"
+	}
+}
